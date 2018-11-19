@@ -1,11 +1,16 @@
 import os
 from flask import Flask, request
 from flask_uploads import UploadSet, IMAGES, configure_uploads
+from flask_cors import CORS, cross_origin
 import pyrebase
+
+import gunicorn
 
 
 # Server Gubbins
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['UPLOADED_IMAGES_DEST'] = './temp/'
 images = UploadSet('images', IMAGES)
 configure_uploads(app, (images,))
@@ -27,6 +32,7 @@ storage = firebase.storage()
 
 # API ENDPOINTS
 @app.route('/api/v1/new-campaign-submit/', methods=['PUT'])
+@cross_origin()
 def new_campaign():  # creates new campaign
 
     title = request.form.get('title')
@@ -59,6 +65,7 @@ def new_campaign():  # creates new campaign
 
 
 @app.route('/api/v1/get-campaign', methods=['GET'])
+@cross_origin()
 def get_campaign():
     campaign_address = request.form.get('campaign_address')
     campaign = db.child("campaigns").child(campaign_address).get()
@@ -66,6 +73,7 @@ def get_campaign():
 
 
 @app.route('/api/v1/get-campaigner', methods=['GET'])
+@cross_origin()
 def get_campaigner():
     campaigner_address = request.form.get('campaigner_address')
     campaigner = db.child("campaigners").child(campaigner_address).get()
@@ -73,9 +81,10 @@ def get_campaigner():
 
 
 @app.route("/")
+@cross_origin()
 def index():
     return "Welcome to the Backable campaign server. You shouldn't be here!"
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=True)
