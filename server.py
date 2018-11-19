@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_uploads import UploadSet, IMAGES, configure_uploads
 from flask_cors import CORS, cross_origin
 import pyrebase
@@ -53,7 +53,8 @@ def new_campaign():  # creates new campaign
                      'description': description,
                      'goal': goal,
                      'tags': tags,
-                     'image_url': image_url
+                     'image_url': image_url,
+                     'campaigner_address': campaigner_address
                      }
     db.child("campaigns").child(campaign_address).set(campaign_data)
 
@@ -67,17 +68,17 @@ def new_campaign():  # creates new campaign
 @app.route('/api/v1/get-campaign', methods=['GET'])
 @cross_origin()
 def get_campaign():
-    campaign_address = request.form.get('campaign_address')
+    campaign_address = request.headers.get('campaign_address')
     campaign = db.child("campaigns").child(campaign_address).get()
-    return campaign
+    return jsonify(campaign.val())
 
 
 @app.route('/api/v1/get-campaigner', methods=['GET'])
 @cross_origin()
 def get_campaigner():
-    campaigner_address = request.form.get('campaigner_address')
+    campaigner_address = request.headers.get('campaigner_address')
     campaigner = db.child("campaigners").child(campaigner_address).get()
-    return campaigner
+    return jsonify(campaigner.val())
 
 
 @app.route("/")
