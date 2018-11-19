@@ -1,0 +1,81 @@
+import os
+from flask import Flask, request
+from flask_uploads import UploadSet, IMAGES, configure_uploads
+import pyrebase
+
+
+# Server Gubbins
+app = Flask(__name__)
+app.config['UPLOADED_IMAGES_DEST'] = './temp/'
+images = UploadSet('images', IMAGES)
+configure_uploads(app, (images,))
+
+
+# Firebase Helper
+config = {
+  "apiKey": "AIzaSyCwqZMITcTwEbTQcWXW5BH2mk4K0jExY6I",
+  "authDomain": "backable-5ceed.firebaseapp.com",
+  "databaseURL": "https://backable-5ceed.firebaseio.com/",
+  "storageBucket": "backable-5ceed.appspot.com",
+  "serviceAccount": "./backable-5ceed-firebase-adminsdk-vkvxr-17177b2e9d.json"
+}
+
+firebase = pyrebase.initialize_app(config)
+db = firebase.database()
+storage = firebase.storage()
+
+
+# API ENDPOINTS
+@app.route('/api/v1/new-campaign-submit/', methods=['PUT'])
+def new_campaign():  # creates new campaign
+
+    title = request.form.get('title')
+    description = request.form.get('description')
+    goal = request.form.get('goal')
+    tags = request.form.get('tags')
+    campaign_address = request.form.get('campaign_address')
+    campaigner_address = request.form.get('campaigner_address')
+
+    # Saves image in Firebase storage, cleans up temporary files after upload
+    filename = images.save(request.files['image'])
+    storage.child("images/" + campaign_address + ".jpg").put("temp/" + filename)
+    image_url = storage.child("images/" + campaign_address + ".jpg").get_url(1)
+    os.remove('temp/' + filename)
+
+    # Creates new campaign in database
+    campaign_data = {'title': title,
+                     'description': description,
+                     'goal': goal,
+                     'tags': tags,
+                     'image_url': image_url
+                     }
+    db.child("campaigns").child(campaign_address).set(campaign_data)
+
+    # Updates campaigner with new campaign address
+    campaigner_data = {'campaign_address': campaign_address}
+    db.child("campaigners").child(campaigner_address).push(campaigner_data)
+
+    return 'Campaign {} created by {}.'.format(campaign_address, campaigner_address)
+
+
+@app.route('/api/v1/get-campaign', methods=['GET'])
+def get_campaign():
+    campaign_address = request.form.get('campaign_address')
+    campaign = db.child("campaigns").child(campaign_address).get()
+    return campaign
+
+
+@app.route('/api/v1/get-campaigner', methods=['GET'])
+def get_campaigner():
+    campaigner_address = request.form.get('campaigner_address')
+    campaigner = db.child("campaigners").child(campaigner_address).get()
+    return campaigner
+
+
+@app.route("/")
+def index():
+    return "Welcome to the Backable campaign server. You shouldn't be here!"
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
