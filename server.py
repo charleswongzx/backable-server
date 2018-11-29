@@ -73,6 +73,14 @@ def get_campaign():
     return jsonify(campaign.val())
 
 
+@app.route('/api/v1/get-campaigns', methods=['GET'])
+@cross_origin()
+def get_campaigns():
+    entities = request.headers.get('num_entities')
+    campaigns = db.child("campaigns").order_by_key().limit_to_first(entities).get()
+    return jsonify(campaigns.val())
+
+
 @app.route('/api/v1/get-campaigner', methods=['GET'])
 @cross_origin()
 def get_campaigner():
