@@ -92,6 +92,27 @@ def submit_new_pledge():
     return 'Successfully added campaign {} to backer {} profile.'.format(campaign_address, backer_address)
 
 
+@app.route('/api/v1/remove-pledge', methods=['DELETE'])
+@cross_origin()
+def remove_pledge():
+    backer_address = request.headers.get('backer_address')
+    campaign_address = request.headers.get('campaign_address').encode('ascii', 'ignore')
+    campaigns = db.child("backers").child(backer_address).get()
+    campaigns_dict = campaigns.val()
+
+    fbhash_to_be_removed = ''
+
+    for fbhash in (list(campaigns_dict.keys())):
+        if campaigns_dict[fbhash]['campaign_address'] == campaign_address:
+            fbhash_to_be_removed = fbhash
+
+    db.child("backers").child(backer_address).child(fbhash_to_be_removed).remove()
+    # db.child("backers").child(backer_address).push(campaign_data)
+    return 'Removed backer pledge {}'.format(fbhash_to_be_removed)
+
+    # return 'Successfully added campaign {} to backer {} profile.'.format(campaign_address, backer_address)
+
+
 @app.route('/api/v1/get-campaigns-by-backer', methods=['GET'])
 @cross_origin()
 def get_campaigns_by_backer():
