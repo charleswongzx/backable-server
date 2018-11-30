@@ -87,7 +87,7 @@ def submit_new_pledge():
     campaign_address = request.form.get('campaign_address')
     backer_address = request.form.get('backer_address')
     campaign_data = {'campaign_address': campaign_address}
-    db.child("backers").child(backer_address).set(campaign_data)
+    db.child("backers").child(backer_address).push(campaign_data)
 
     return 'Successfully added campaign {} to backer {} profile.'.format(campaign_address, backer_address)
 
