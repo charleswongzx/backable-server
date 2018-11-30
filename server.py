@@ -81,6 +81,25 @@ def get_campaigns():
     return jsonify(campaigns.val())
 
 
+@app.route('/api/v1/submit-new-pledge', methods=['PUT'])
+@cross_origin()
+def submit_new_pledge():
+    campaign_address = request.form.get('campaign_address')
+    backer_address = request.form.get('backer_address')
+    campaign_data = {'campaign_address': campaign_address}
+    db.child("backers").child(backer_address).set(campaign_data)
+
+    return 'Successfully added campaign {} to backer {} profile.'.format(campaign_address, backer_address)
+
+
+@app.route('/api/v1/get-campaigns-by-backer', methods=['GET'])
+@cross_origin()
+def get_campaigns_by_backer():
+    backer_address = request.headers.get('backer_address')
+    campaigns = db.child("backers").child(backer_address).get()
+    return jsonify(campaigns.val())
+
+
 @app.route('/api/v1/get-campaigner', methods=['GET'])
 @cross_origin()
 def get_campaigner():
