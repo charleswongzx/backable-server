@@ -77,6 +77,7 @@ def get_campaign():
 @cross_origin()
 def get_campaigns():
     entities = request.headers.get('num_entities')
+    print('entities' + entities)
     campaigns = db.child("campaigns").order_by_key().limit_to_first(entities).get()
     return jsonify(campaigns.val())
 
