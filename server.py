@@ -3,9 +3,9 @@ from flask import Flask, request, jsonify
 from flask_uploads import UploadSet, IMAGES, configure_uploads
 from flask_cors import CORS, cross_origin
 import pyrebase
+import datetime
 
 import gunicorn
-
 
 # Server Gubbins
 app = Flask(__name__)
@@ -15,14 +15,13 @@ app.config['UPLOADED_IMAGES_DEST'] = './temp/'
 images = UploadSet('images', IMAGES)
 configure_uploads(app, (images,))
 
-
 # Firebase Helper
 config = {
-  "apiKey": "AIzaSyCwqZMITcTwEbTQcWXW5BH2mk4K0jExY6I",
-  "authDomain": "backable-5ceed.firebaseapp.com",
-  "databaseURL": "https://backable-5ceed.firebaseio.com/",
-  "storageBucket": "backable-5ceed.appspot.com",
-  "serviceAccount": "./backable-5ceed-firebase-adminsdk-vkvxr-17177b2e9d.json"
+    "apiKey": "AIzaSyCwqZMITcTwEbTQcWXW5BH2mk4K0jExY6I",
+    "authDomain": "backable-5ceed.firebaseapp.com",
+    "databaseURL": "https://backable-5ceed.firebaseio.com/",
+    "storageBucket": "backable-5ceed.appspot.com",
+    "serviceAccount": "./backable-5ceed-firebase-adminsdk-vkvxr-17177b2e9d.json"
 }
 
 firebase = pyrebase.initialize_app(config)
@@ -35,6 +34,7 @@ storage = firebase.storage()
 @cross_origin()
 def new_campaign():  # creates new campaign
 
+    creator_name = request.form.get('creator_name')
     title = request.form.get('title')
     description = request.form.get('description')
     goal = request.form.get('goal')
@@ -49,13 +49,16 @@ def new_campaign():  # creates new campaign
     os.remove('temp/' + filename)
 
     # Creates new campaign in database
-    campaign_data = {'title': title,
-                     'description': description,
-                     'goal': goal,
-                     'tags': tags,
-                     'image_url': image_url,
-                     'campaigner_address': campaigner_address
-                     }
+    campaign_data = {
+        'creator_name': creator_name,
+        'title': title,
+        'description': description,
+        'goal': goal,
+        'tags': tags,
+        'image_url': image_url,
+        'campaigner_address': campaigner_address,
+        'timestamp': datetime.datetime.now()
+    }
     db.child("campaigns").child(campaign_address).set(campaign_data)
 
     # Updates campaigner with new campaign address
@@ -78,7 +81,7 @@ def get_campaign():
 def get_campaigns():
     entities = request.headers.get('num_entities')
     print('entities' + entities)
-    campaigns = db.child("campaigns").order_by_key().limit_to_first(entities).get()
+    campaigns = db.child("campaigns").order_by_child('timestamp').limit_to_first(entities).get()
     return jsonify(campaigns.val())
 
 
