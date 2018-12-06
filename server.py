@@ -57,7 +57,7 @@ def new_campaign():  # creates new campaign
         'tags': tags,
         'image_url': image_url,
         'campaigner_address': campaigner_address,
-        'timestamp': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        'timestamp': int(datetime.datetime.now().timestamp())
     }
     db.child("campaigns").child(campaign_address).set(campaign_data)
 
