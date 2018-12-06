@@ -41,6 +41,7 @@ def new_campaign():  # creates new campaign
     tags = request.form.get('tags')
     campaign_address = request.form.get('campaign_address')
     campaigner_address = request.form.get('campaigner_address')
+    end_date = request.form.get('end_date')
 
     # Saves image in Firebase storage, cleans up temporary files after upload
     filename = images.save(request.files['image'])
@@ -57,7 +58,8 @@ def new_campaign():  # creates new campaign
         'tags': tags,
         'image_url': image_url,
         'campaigner_address': campaigner_address,
-        'timestamp': int(time.time())
+        'timestamp': int(time.time()),
+        'end_date': end_date
     }
     db.child("campaigns").child(campaign_address).set(campaign_data)
 
