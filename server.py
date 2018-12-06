@@ -3,7 +3,7 @@ from flask import Flask, request, jsonify
 from flask_uploads import UploadSet, IMAGES, configure_uploads
 from flask_cors import CORS, cross_origin
 import pyrebase
-import datetime
+import time
 
 import gunicorn
 
@@ -57,7 +57,7 @@ def new_campaign():  # creates new campaign
         'tags': tags,
         'image_url': image_url,
         'campaigner_address': campaigner_address,
-        'timestamp': int(datetime.datetime.now().timestamp())
+        'timestamp': int(time.time())
     }
     db.child("campaigns").child(campaign_address).set(campaign_data)
 
