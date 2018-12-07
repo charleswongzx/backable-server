@@ -42,6 +42,7 @@ def new_campaign():  # creates new campaign
     campaign_address = request.form.get('campaign_address')
     campaigner_address = request.form.get('campaigner_address')
     end_date = request.form.get('end_date')
+    campaign_subheader = request.form.get('campaign_subheader')
 
     # Saves image in Firebase storage, cleans up temporary files after upload
     filename = images.save(request.files['image'])
@@ -51,6 +52,7 @@ def new_campaign():  # creates new campaign
 
     # Creates new campaign in database
     campaign_data = {
+        'campaign_subheader': campaign_subheader,
         'creator_name': creator_name,
         'title': title,
         'description': description,
