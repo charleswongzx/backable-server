@@ -17,7 +17,7 @@ configure_uploads(app, (images,))
 
 # Firebase Helper
 config = {
-    "apiKey": "AIzaSyCwqZMITcTwEbTQcWXW5BH2mk4K0jExY6I",
+    "apiKey": "0",
     "authDomain": "backable-5ceed.firebaseapp.com",
     "databaseURL": "https://backable-5ceed.firebaseio.com/",
     "storageBucket": "backable-5ceed.appspot.com",
